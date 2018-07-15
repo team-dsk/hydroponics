@@ -10,6 +10,7 @@ from spreadsheet import SpreadSheet
 import Adafruit_DHT as DHT
 from us_015 import US_015
 #from sqlite_connect import SqliteConnect
+import ConfigParser
 #-----------------------------------
 #DS18B20で水温を計測する
 #-----------------------------------
@@ -56,21 +57,30 @@ def test(t0,t1,t2,h,l):
     #-----------------------------------
     #Google スプレッドシートへレコード追加
     #-----------------------------------
-def spreadSheet_insert(t0,t1,t2,h,l):
-    KEY_FILENAME ='/home/pi/python_apps/hydroponics/auth.json'
-    SHEET_ID ='1nZhut2Sp8ZlijdCSqxCs4__dDsPXPXUYnu891RYcHqE'
-    APPEND_RANGE = 'sheet1!A1:D1'
-    APPEND_LENGTH = 5
-    sheet = SpreadSheet(KEY_FILENAME,SHEET_ID,APPEND_RANGE,APPEND_LENGTH)
+def spreadSheet_insert(keyFileName, sheetId, appendRange, appendLength, t0,t1,t2,h,l):
+    sheet = SpreadSheet(keyFileName,sheetId,appendRange,appendLength)
     sheet.append(["{0:%Y-%m-%d %H:%M:%S}".format(t0), t1, t2,h,l])
 #-----------------------------------
 #メイン処理
 #-----------------------------------
 def main():
-    Hight =22.13 #容器の高さ(cm)
-    GPIO_TRIG = 17 #US-015
-    GPIO_ECHO = 27 #US-015
-    GPIO_TEMP = 26 #DHT22
+
+    #設定ファイルの読み込み
+    infile = ConfigParser.SafeConfigParser
+    infile.read('./config.ini')
+
+    #容器の高さ(cm)
+    Hight =infile.get('US-015', 'HIGHT')
+    GPIO_TRIG = infile.get('US-015', 'GPIO_TRIG')
+    GPIO_ECHO = infile.get('US-015', 'GPIO_ECHO')
+    GPIO_TEMP = infile.get('DHT22', 'GPIO_TEMP')
+
+    #スプレッドシートの設定
+    KEY_FILE_NAME = infile.get('spreadSheet', 'KEY_FILE_NAME')
+    SHEET_ID = infile.get('spreadSheet', 'SHEET_ID')
+    APPEND_RANGE = infile.get('spreadSheet', 'APPEND_RANGE')
+    APPEND_LENGTH = infile.getint('spreadSheet', 'APPEND_LENGTH')
+
     #t0:日時,t1:水温、t2:室温、h:湿度 l:水位
     t0 = datetime.datetime.now()
     t1=0.0
@@ -90,7 +100,7 @@ def main():
     #ローカルDBへ書き込み
     #sqlite_insert(t0,t1,t2,h,l)
     #GoogleSpredSheetへ書き込み
-    spreadSheet_insert(t0,t1,t2,h,l)
+    spreadSheet_insert(KEY_FILE_NAME,SHEET_ID,APPEND_RANGE,APPEND_LENGTH,t0,t1,t2,h,l)
     #処理終了
     sys.exit()
 #-----------------------------------
