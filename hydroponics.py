@@ -7,7 +7,7 @@ import RPi.GPIO as GPIO
 sys.path.append('/home/pi/python_apps/')
 #from w1thermsensor import W1ThermSensor
 from spreadsheet import SpreadSheet
-#import Adafruit_DHT as DHT
+import Adafruit_DHT as DHT
 from us_015 import US_015
 #from sqlite_connect import SqliteConnect
 #-----------------------------------
@@ -20,12 +20,12 @@ from us_015 import US_015
 #DHT22で室温、湿度を計測する
 #DHT_GPIO 接続したGPIOポート
 #-----------------------------------
-#def DHT22_result(DHT_GPIO):
-#    ## センサーの種類
-#    SENSOR_TYPE = DHT.DHT22
+def DHT22_result(DHT_GPIO):
+    ## センサーの種類
+    SENSOR_TYPE = DHT.DHT22
     ## 測定開始
-    #h,t = DHT.read_retry(SENSOR_TYPE, DHT_GPIO)
-    #return [round(t,4),round(h,4)]
+    h,t = DHT.read_retry(SENSOR_TYPE, DHT_GPIO)
+    return [round(t,4),round(h,4)]
 #-----------------------------------
 #US-015で水位を計測する 
 # 水位＝容器高さ - 水面までの距離
@@ -70,7 +70,7 @@ def main():
     Hight =22.13 #容器の高さ(cm)
     GPIO_TRIG = 17 #US-015
     GPIO_ECHO = 27 #US-015
-    GPIO_TEMP = 16 #DHT22
+    GPIO_TEMP = 26 #DHT22
     #t0:日時,t1:水温、t2:室温、h:湿度 l:水位
     t0 = datetime.datetime.now()
     t1=0.0
@@ -80,10 +80,10 @@ def main():
     #水温計測
     #t1 = DS18B20_result()
     #室温、湿度計測
-    #DHT22_array = DHT22_result(GPIO_TEMP)
-    #if DHT22_array is not None:
-    #   t2 = DHT22_array[0]
-    #   h  = DHT22_array[1]
+    DHT22_array = DHT22_result(GPIO_TEMP)
+    if DHT22_array is not None:
+       t2 = DHT22_array[0]
+       h  = DHT22_array[1]
     #水位計測
     l = us_015_result(GPIO_TRIG,GPIO_ECHO,Hight,t2)
     test(t0,t1,t2,h,l)
