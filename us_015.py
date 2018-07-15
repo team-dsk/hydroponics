@@ -12,23 +12,18 @@ class US_015(object):
         self.trig = gpio_trig
         self.echo = gpio_echo
 
-        print(str(gpio_trig))
-        print(str(gpio_echo))
     #-----------------------------------
     # HIGH or LOWの時計測
     #-----------------------------------
     def pulseIn(self,PIN, start=1, end=0):
-        print("pulseIn start")
         if start==0: end = 1
         t_start = 0
         t_end = 0
         # ECHO_PINがHIGHである時間を計測
         while GPIO.input(PIN) == end:
             t_start = time.time()
-            print("t_start:")
         while GPIO.input(PIN) == start:
             t_end = time.time()
-            #print("GPIO.input(PIN):"+str(GPIO.input(PIN)))
         return t_end - t_start
     
     #-----------------------------------
@@ -46,11 +41,9 @@ class US_015(object):
             GPIO.output(TRIG_PIN, False)
             # HIGHの時間計測
             t = self.pulseIn(ECHO_PIN)
-            print("calc_distance:"+str(t))
             # 距離[cm] = 音速[cm/s] * 時間[s]/2
             d = v * float(t)/2
             distance = math.floor(d *100) /100
-            #print(distance, "cm")
             if distance > 0 and distance < 1000:
                 break
         # ピン設定解除
