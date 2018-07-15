@@ -24,7 +24,6 @@ class SpreadSheet(object):
 
 		value_range_body = {'values':[values]}
 		result = self.service.spreadsheets().values().append(spreadsheetId=self.sheetId, range=self.append_range, valueInputOption='USER_ENTERED', body=value_range_body).execute()
-		#print(result)
 
 if __name__ == '__main__':
 	sheet = SpreadSheet("1nZhut2Sp8ZlijdCSqxCs4__dDsPXPXUYnu891RYcHqE")
