@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging.config
 import sys
 import datetime
 import time
@@ -9,6 +10,7 @@ sys.path.append('/home/pi/python_apps/')
 from spreadsheet import SpreadSheet
 import Adafruit_DHT as DHT
 from us_015 import US_015
+#from log_util import LOG_UTIL
 #from sqlite_connect import SqliteConnect
 import ConfigParser
 #-----------------------------------
@@ -22,9 +24,9 @@ import ConfigParser
 #DHT_GPIO 接続したGPIOポート
 #-----------------------------------
 def DHT22_result(DHT_GPIO):
-    ## センサーの種類
+    # センサーの種類
     SENSOR_TYPE = DHT.DHT22
-    ## 測定開始
+    # 測定開始
     h,t = DHT.read_retry(SENSOR_TYPE, DHT_GPIO)
     return [round(t,4),round(h,4)]
 #-----------------------------------
@@ -49,6 +51,21 @@ def us_015_result(pPinTrig,pPinEcho,pHight,pTemp):
     #TEST
     #-----------------------------------
 def test(t0,t1,t2,h,l):
+    # ログ設定ファイルからログ設定を読み込み
+    logging.config.fileConfig('logging.conf')
+    logging.basicConfig(format="%(asctime)s - %(levelname)s - line %(lineno)d - %(name)s - %(filename)s - \n*** %(message)s") # defaultはlevel=logging.DEBUG)
+    logging.getLogger("googleapiclient.discovery_cache").setLevel(level=logging.ERROR) # ImportErrorがおびただしく出てくるので、ここのlogは不要
+    logging.getLogger("googleapiclient.discovery").setLevel(level=logging.DEBUG) # このログは出してほしい
+    logger = logging.getLogger(__name__)
+    #logUtil = LOG_UTIL()
+    #logger = logUtil.getLogger(__name__)
+ 
+    logger.log(20, 'info')
+    logger.log(30, 'warning')
+    logger.log(100, 'test')
+ 
+    logger.info('info')
+    #logger.warning('warning')
     print("日付："+str(t0))
     print("水温：{:.4}".format(t1)+"°")
     print("気温：{:.4}".format(t2)+"°")
@@ -57,23 +74,23 @@ def test(t0,t1,t2,h,l):
     #-----------------------------------
     #Google スプレッドシートへレコード追加
     #-----------------------------------
-def spreadSheet_insert(keyFileName, sheetId, appendRange, appendLength, t0,t1,t2,h,l):
+def spreadSheet_insert(keyFileName,sheetId,appendRange,appendLength,t0,t1,t2,h,l):
     sheet = SpreadSheet(keyFileName,sheetId,appendRange,appendLength)
-    sheet.append(["{0:%Y-%m-%d %H:%M:%S}".format(t0), t1, t2,h,l])
+    sheet.append(["{0:%Y-%m-%d %H:%M:%S}".format(t0),t1,t2,h,l])
 #-----------------------------------
 #メイン処理
 #-----------------------------------
 def main():
 
     #設定ファイルの読み込み
-    infile = ConfigParser.SafeConfigParser
+    infile = ConfigParser.SafeConfigParser()
     infile.read('./config.ini')
 
     #容器の高さ(cm)
-    Hight =infile.get('US-015', 'HIGHT')
-    GPIO_TRIG = infile.get('US-015', 'GPIO_TRIG')
-    GPIO_ECHO = infile.get('US-015', 'GPIO_ECHO')
-    GPIO_TEMP = infile.get('DHT22', 'GPIO_TEMP')
+    Hight =infile.getfloat('US-015', 'HIGHT')
+    GPIO_TRIG = infile.getint('US-015', 'GPIO_TRIG')
+    GPIO_ECHO = infile.getint('US-015', 'GPIO_ECHO')
+    GPIO_TEMP = infile.getint('DHT22', 'GPIO_TEMP')
 
     #スプレッドシートの設定
     KEY_FILE_NAME = infile.get('spreadSheet', 'KEY_FILE_NAME')
