@@ -39,8 +39,9 @@ def DHT22_result(DHT_GPIO):
 def us_015_result(pPinTrig,pPinEcho,pHight,pTemp):
     instance = US_015(pPinTrig,pPinEcho)
     d = instance.result(pTemp)
-    l = pHight - d
-    return l
+#    l = pHight - d
+#    return l
+    return d
 #-----------------------------------
 #SQLiteへt0:日時,t1:水温、t2:室温、h:湿度 l:水位を書き込む 
 #-----------------------------------
